@@ -9,7 +9,6 @@ public class JsonUtil {
     static Gson gson = new Gson();
 
     public static <T> T getObject(String jsonStr, Class<T> clazz) {
-
         return gson.fromJson(jsonStr, clazz);
     }
 
