@@ -150,12 +150,12 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
                                 data.addAll(textMsgList);
 
                                 for (TextMsg textMsg : textMsgList) {
-                                    String idStr = String.valueOf(textMsg.getId());
-                                    TextMsg oldData = LitePal.where("id = ?", idStr).findFirst(TextMsg.class);
+                                    String idStr = String.valueOf(textMsg.getMsgId());
+                                    TextMsg oldData = LitePal.where("msgId = ?", idStr).findFirst(TextMsg.class);
                                     if (oldData == null) {
                                         textMsg.save();
                                     } else {
-                                        textMsg.updateAll("id = ?", idStr);
+                                        textMsg.updateAll("msgId = ?", idStr);
                                     }
                                 }
 
@@ -190,7 +190,7 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
         if (currentUser == null) {
             currentUser = LitePal.findFirst(User.class);
         }
-        return currentUser.getId();
+        return currentUser.getUserId();
     }
 
     private String getLocalVersion() {
@@ -203,7 +203,7 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
     private void updateLocalVersion(String newestVersion) {
         if (localVersion == null) {
             localVersion = new Version();
-            localVersion.setUserId(currentUser.getId());
+            localVersion.setUserId(currentUser.getUserId());
         }
         localVersion.setVersion(newestVersion);
         localVersion.save();
@@ -212,7 +212,7 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
     @Override
     public void onClick(View view) {
         Intent intent = new Intent(this, TextMsgDetailActivity.class);
-        intent.putExtra("id", CommonConstant.NEW_MSG_ID);
+        intent.putExtra("msgId", CommonConstant.NEW_MSG_ID);
         intent.putExtra("content", "");
         startActivity(intent);
     }

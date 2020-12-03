@@ -103,7 +103,7 @@ public class UserLoginActivity extends BaseActivity implements View.OnClickListe
                         public void run() {
                             User user = new User();
                             //TODO object类型反序列化后，被判断为double。后续需要优化后端返回值类型
-                            user.setId(((Double) result.getData()).intValue());
+                            user.setUserId(((Double) result.getData()).intValue());
                             user.setName(username);
                             user.save();
                             showToast("登录成功");

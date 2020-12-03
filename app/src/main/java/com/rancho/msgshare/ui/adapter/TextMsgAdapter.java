@@ -59,7 +59,7 @@ public class TextMsgAdapter extends RecyclerView.Adapter<TextMsgAdapter.ViewHold
                 int position = viewHolder.getAdapterPosition();
                 TextMsg textMsg = textMsgList.get(position);
                 Intent intent = new Intent(view.getContext(), TextMsgDetailActivity.class);
-                intent.putExtra("id", textMsg.getId());
+                intent.putExtra("msgId", textMsg.getMsgId());
                 intent.putExtra("content", textMsg.getContent());
                 view.getContext().startActivity(intent);
             }

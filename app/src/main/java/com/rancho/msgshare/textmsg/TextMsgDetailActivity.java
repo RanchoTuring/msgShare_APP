@@ -2,6 +2,7 @@ package com.rancho.msgshare.textmsg;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -52,13 +53,13 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
     private void mockData(Intent intent) {
         textMsg = new TextMsg();
         textMsg.setUserId(123);
-        textMsg.setId(3111);
+        textMsg.setMsgId(3111);
         textMsg.setContent("啊实打实大苏打阿松大啊大苏打阿松大阿松大阿松大阿松大");
     }
 
     private void getTextMsgFromIntent(Intent intent) {
         textMsg = new TextMsg();
-        textMsg.setId(intent.getIntExtra("id", 0));
+        textMsg.setMsgId(intent.getIntExtra("msgId", 0));
         textMsg.setContent(intent.getStringExtra("content"));
     }
 
@@ -68,16 +69,16 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
             case R.id.save_text_msg: {
                 String newText = editText.getText().toString();
                 //新建的笔记
-                if (textMsg.getId() == CommonConstant.NEW_MSG_ID) {
+                if (textMsg.getMsgId() == CommonConstant.NEW_MSG_ID) {
                     addTextMsg(newText);
                 } else {
-                    updateTextMsg(textMsg.getId(), newText);
+                    updateTextMsg(textMsg.getMsgId(), newText);
                 }
 
                 break;
             }
             case R.id.delete_text_msg: {
-                deleteTextMsg(textMsg.getId());
+                deleteTextMsg(textMsg.getMsgId());
                 break;
             }
         }
@@ -187,11 +188,12 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
             public void onResponse(Call call, Response response) throws IOException {
                 final CommonResult result = JsonUtil.getObject(response.body().string(), CommonResult.class);
                 if (result.getCode() == 0) {
-                    LitePal.deleteAll(TextMsg.class, "id = ?", String.valueOf(textMsg.getId()));
+                    LitePal.deleteAll(TextMsg.class, "msgId = ?", String.valueOf(textMsg.getMsgId()));
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
                             showToast("删除成功");
+                            finish();
                         }
                     });
                 } else {
