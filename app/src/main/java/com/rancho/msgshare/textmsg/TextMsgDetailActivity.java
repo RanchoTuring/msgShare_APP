@@ -57,6 +57,10 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
         textMsg.setContent("啊实打实大苏打阿松大啊大苏打阿松大阿松大阿松大阿松大");
     }
 
+    /**
+     * 从Intent中获取相关的信息
+     * @param intent
+     */
     private void getTextMsgFromIntent(Intent intent) {
         textMsg = new TextMsg();
         textMsg.setMsgId(intent.getIntExtra("msgId", 0));
@@ -82,13 +86,11 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
                 break;
             }
         }
-
     }
 
     private void showToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
-
 
     private void addTextMsg(String text) {
         HttpParam paramMsgContent = new HttpParam(CommonConstant.PARAM_MSG_CONTENT, text);
@@ -103,7 +105,6 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
                     }
                 });
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final CommonResult result = JsonUtil.getObject(response.body().string(), CommonResult.class);
@@ -124,9 +125,8 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
                 }
             }
         };
-
-        HttpUtil.post(CommonConstant.HOST_URL + CommonConstant.TEXT_MSG_RES_URL, callback, paramMsgContent, paramDevice);
-
+        HttpUtil.post(CommonConstant.HOST_URL + CommonConstant.TEXT_MSG_RES_URL,
+                callback, paramMsgContent, paramDevice);
     }
 
     private void updateTextMsg(int msgId, String text) {
@@ -165,14 +165,12 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
                 }
             }
         };
-
-        HttpUtil.put(CommonConstant.HOST_URL + CommonConstant.TEXT_MSG_RES_URL, callback, paramMsgId, paramMsgContent, paramDevice);
+        HttpUtil.put(CommonConstant.HOST_URL + CommonConstant.TEXT_MSG_RES_URL,
+                callback, paramMsgId, paramMsgContent, paramDevice);
     }
 
     private void deleteTextMsg(int msgId) {
-
         HttpParam param = new HttpParam(CommonConstant.PARAM_MSG_ID, String.valueOf(msgId));
-
         Callback callback = new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -183,7 +181,6 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
                     }
                 });
             }
-
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final CommonResult result = JsonUtil.getObject(response.body().string(), CommonResult.class);
@@ -206,7 +203,6 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
                 }
             }
         };
-
         HttpUtil.delete(CommonConstant.HOST_URL + CommonConstant.TEXT_MSG_RES_URL, callback, param);
     }
 

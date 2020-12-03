@@ -45,10 +45,6 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
 
     void initData() {
         data = LitePal.where("userId = ?", String.valueOf(getCurrentId())).find(TextMsg.class);
-//        for(TextMsg obj:data){
-//
-//            Log.d("initData",obj.getContent());
-//        }
     }
 
 
@@ -76,6 +72,10 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
         updateUserStatus(getCurrentId());
     }
 
+    /**
+     * 保持用户登录状态
+     * @param id
+     */
     private void updateUserStatus(int id) {
         Callback callback = new Callback() {
             @Override
@@ -103,10 +103,12 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
                 }
             }
         };
-
         HttpUtil.get(CommonConstant.HOST_URL + CommonConstant.USER_STATUS_RES_URL + id, callback);
     }
 
+    /**
+     * 获取最新数据
+     */
     private void refreshData() {
         Callback callback = new Callback() {
             @Override
@@ -144,8 +146,6 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
                                 final TextMsgResult dataResult = JsonUtil.getObject(response.body().string(), TextMsgResult.class);
 
                                 List<TextMsg> textMsgList = dataResult.getData();
-
-                                Log.d("data done", "数据准备就绪");
                                 data.clear();
                                 data.addAll(textMsgList);
 
@@ -162,11 +162,9 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Log.d("data done", "调用ui线程渲染");
                                         textMsgAdapter.notifyDataSetChanged();
                                     }
                                 });
-
                                 updateLocalVersion(newestVersion);
                             }
                         };
@@ -176,9 +174,7 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
                         Log.d("version check", "当前为最新版本，不拉取数据");
                     }
                 } else {
-
                     Log.d("get version result.getCode()!=0", result.getMsg());
-
                 }
             }
         };

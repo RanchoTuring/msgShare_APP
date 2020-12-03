@@ -48,7 +48,6 @@ public class UserLoginActivity extends BaseActivity implements View.OnClickListe
         passwordEditText = findViewById(R.id.password);
         loginBtn = findViewById(R.id.log_in);
         signUpBtn = findViewById(R.id.sign_up);
-        loadingProgressBar = findViewById(R.id.loading);
 
         loginBtn.setOnClickListener(this);
         signUpBtn.setOnClickListener(this);
@@ -76,7 +75,6 @@ public class UserLoginActivity extends BaseActivity implements View.OnClickListe
 
 
     private void logIn(final String username, String password) {
-        //TODO 请求后端，进行登录，保存id
         HttpParam paramUsername = new HttpParam(CommonConstant.PARAM_USERNAME, username);
         HttpParam paramPassword = new HttpParam(CommonConstant.PARAM_PASSWORD, password);
 
@@ -123,7 +121,6 @@ public class UserLoginActivity extends BaseActivity implements View.OnClickListe
             }
         };
         HttpUtil.get(CommonConstant.HOST_URL + CommonConstant.USER_RES_URL, callback, paramUsername, paramPassword);
-
     }
 
     private void signUp(String username, String password) {

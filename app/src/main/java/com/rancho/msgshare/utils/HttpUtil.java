@@ -17,6 +17,9 @@ import okhttp3.RequestBody;
 
 public class HttpUtil {
 
+    /**
+     * 重写saveFromResponse和loadForRequest方法，使OkHttpClient可以存储Cookie
+     */
     private static OkHttpClient httpClient = new OkHttpClient.Builder().cookieJar(new CookieJar() {
         private final HashMap<String, List<Cookie>> cookieStore = new HashMap<>();
 
@@ -37,7 +40,6 @@ public class HttpUtil {
         if (params.length != 0) {
             query = getQueryString(params);
         }
-
         Request request = new Request.Builder()
                 .url(url + query)
                 .build();

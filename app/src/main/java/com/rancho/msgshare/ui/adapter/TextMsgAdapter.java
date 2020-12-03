@@ -78,16 +78,13 @@ public class TextMsgAdapter extends RecyclerView.Adapter<TextMsgAdapter.ViewHold
 
     private String getProfile(String content) {
         if (content.length() > CommonConstant.PROFILE_MAX_LENGTH) {
-            return content.substring(0, CommonConstant.PROFILE_MAX_LENGTH);
+            return content.substring(0, CommonConstant.PROFILE_MAX_LENGTH) + "...";
         }
         return content;
     }
-
 
     @Override
     public int getItemCount() {
         return textMsgList.size();
     }
-
-
 }

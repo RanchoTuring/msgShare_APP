@@ -5,6 +5,9 @@ import com.google.gson.reflect.TypeToken;
 
 import java.util.List;
 
+/**
+ * 基于Gson库封装的JsonUtil工具类
+ */
 public class JsonUtil {
     static Gson gson = new Gson();
 
