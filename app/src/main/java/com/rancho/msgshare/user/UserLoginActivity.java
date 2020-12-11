@@ -39,6 +39,13 @@ public class UserLoginActivity extends BaseActivity implements View.OnClickListe
     Button signUpBtn;
     ProgressBar loadingProgressBar;
 
+    abstract class BaseCallback implements Callback {
+        @Override
+        public void onFailure(Call call, IOException e) {
+            showToastOnUiThread("网络错误");
+        }
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,45 +85,23 @@ public class UserLoginActivity extends BaseActivity implements View.OnClickListe
         HttpParam paramUsername = new HttpParam(CommonConstant.PARAM_USERNAME, username);
         HttpParam paramPassword = new HttpParam(CommonConstant.PARAM_PASSWORD, password);
 
-        Callback callback = new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Log.d("login", e.getMessage());
-                e.printStackTrace();
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showToast("网络错误");
-                    }
-                });
-            }
-
+        Callback callback = new BaseCallback() {
             @Override
             public void onResponse(Call call, final Response response) throws IOException {
                 final CommonResult result = JsonUtil.getObject(response.body().string(), CommonResult.class);
 
                 if (result.getCode() == 0) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            User user = new User();
-                            //TODO object类型反序列化后，被判断为double。后续需要优化后端返回值类型
-                            user.setUserId(((Double) result.getData()).intValue());
-                            user.setName(username);
-                            user.save();
-                            showToast("登录成功");
-                            Intent intent = new Intent(UserLoginActivity.this, TextMsgMainActivity.class);
-                            startActivity(intent);
-                            finish();
-                        }
-                    });
+                    User user = new User();
+                    //TODO object类型反序列化后，被判断为double。后续需要优化后端返回值类型
+                    user.setUserId(((Double) result.getData()).intValue());
+                    user.setName(username);
+                    user.save();
+                    showToastOnUiThread("登录成功");
+                    Intent intent = new Intent(UserLoginActivity.this, TextMsgMainActivity.class);
+                    startActivity(intent);
+                    finish();
                 } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showToast(result.getMsg());
-                        }
-                    });
+                    showToastOnUiThread(result.getMsg());
                 }
             }
         };
@@ -145,7 +130,14 @@ public class UserLoginActivity extends BaseActivity implements View.OnClickListe
         }
     }
 
-    private void showToast(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    private void showToastOnUiThread(final String msg) {
+        runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
     }
 }

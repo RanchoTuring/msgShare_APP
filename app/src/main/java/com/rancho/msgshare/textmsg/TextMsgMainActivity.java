@@ -4,9 +4,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -22,6 +22,8 @@ import com.rancho.msgshare.entity.Version;
 import com.rancho.msgshare.ui.adapter.TextMsgAdapter;
 import com.rancho.msgshare.utils.HttpUtil;
 import com.rancho.msgshare.utils.JsonUtil;
+import com.scwang.smart.refresh.layout.api.RefreshLayout;
+import com.scwang.smart.refresh.layout.listener.OnRefreshListener;
 
 import org.litepal.LitePal;
 
@@ -39,10 +41,21 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
 
     private TextMsgAdapter textMsgAdapter;
     private RecyclerView recyclerView;
+    private RefreshLayout refreshLayout;
 
     private User currentUser;
     private Version localVersion;
 
+    abstract class BaseCallback implements Callback {
+        @Override
+        public void onFailure(Call call, IOException e) {
+            showToastOnUiThread("网络错误");
+        }
+    }
+
+    /**
+     * load data from DB
+     */
     void initData() {
         data = LitePal.where("userId = ?", String.valueOf(getCurrentId())).find(TextMsg.class);
     }
@@ -54,6 +67,15 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
         setContentView(R.layout.activity_text_msg_main);
         FloatingActionButton addTextMsgBtn = findViewById(R.id.new_text_msg_btn);
         addTextMsgBtn.setOnClickListener(this);
+
+        refreshLayout = findViewById(R.id.refreshLayout);
+        refreshLayout.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
+                updateUserStatus(getCurrentId(), true);
+            }
+        });
+
 
         recyclerView = findViewById(R.id.text_msg_recycler_view);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
@@ -69,37 +91,23 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
     protected void onStart() {
         super.onStart();
         Log.d("start", "进入onStart");
-        updateUserStatus(getCurrentId());
+        updateUserStatus(getCurrentId(), false);
     }
 
     /**
-     * 保持用户登录状态
+     * update user login status by hold session
+     *
      * @param id
      */
-    private void updateUserStatus(int id) {
-        Callback callback = new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showToast("网络错误");
-                    }
-                });
-            }
-
+    private void updateUserStatus(int id, final boolean refreshByUser) {
+        Callback callback = new BaseCallback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final CommonResult result = JsonUtil.getObject(response.body().string(), CommonResult.class);
                 if (result.getCode() != 0) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showToast(result.getMsg());
-                        }
-                    });
+                    showToastOnUiThread(result.getMsg());
                 } else {
-                    refreshData();
+                    refreshData(refreshByUser);
                 }
             }
         };
@@ -107,20 +115,10 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
     }
 
     /**
-     * 获取最新数据
+     * get newest data
      */
-    private void refreshData() {
-        Callback callback = new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showToast("网络错误");
-                    }
-                });
-            }
-
+    private void refreshData(final boolean refreshByUser) {
+        Callback callback = new BaseCallback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final CommonResult result = JsonUtil.getObject(response.body().string(), CommonResult.class);
@@ -130,17 +128,7 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
                     String local = getLocalVersion();
 
                     if (local == null || !local.equals(newestVersion)) {
-                        Callback processData = new Callback() {
-                            @Override
-                            public void onFailure(Call call, IOException e) {
-                                runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        showToast("网络错误");
-                                    }
-                                });
-                            }
-
+                        Callback processData = new BaseCallback() {
                             @Override
                             public void onResponse(Call call, Response response) throws IOException {
                                 final TextMsgResult dataResult = JsonUtil.getObject(response.body().string(), TextMsgResult.class);
@@ -173,8 +161,15 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
                     } else {
                         Log.d("version check", "当前为最新版本，不拉取数据");
                     }
+                    if (refreshByUser) {
+                        refreshLayout.finishRefresh(500, true, true);
+                    }
+
                 } else {
                     Log.d("get version result.getCode()!=0", result.getMsg());
+                    if (refreshByUser) {
+                        refreshLayout.finishRefresh(500, false, false);
+                    }
                 }
             }
         };
@@ -213,7 +208,14 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
         startActivity(intent);
     }
 
-    private void showToast(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    private void showToastOnUiThread(final String msg) {
+        runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
     }
 }

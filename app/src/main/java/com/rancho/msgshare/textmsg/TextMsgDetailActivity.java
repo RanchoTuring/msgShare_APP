@@ -32,6 +32,13 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
     private TextMsg textMsg;
     private EditText editText;
 
+    abstract class BaseCallback implements Callback {
+        @Override
+        public void onFailure(Call call, IOException e) {
+            showToastOnUiThread("网络错误");
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,6 +66,7 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
 
     /**
      * 从Intent中获取相关的信息
+     *
      * @param intent
      */
     private void getTextMsgFromIntent(Intent intent) {
@@ -88,40 +96,28 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
         }
     }
 
-    private void showToast(String msg) {
-        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+    private void showToastOnUiThread(final String msg) {
+        runOnUiThread(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
     }
 
     private void addTextMsg(String text) {
         HttpParam paramMsgContent = new HttpParam(CommonConstant.PARAM_MSG_CONTENT, text);
         HttpParam paramDevice = new HttpParam(CommonConstant.PARAM_DEVICE, CommonConstant.DEVICE_TYPE_APP);
-        Callback callback = new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showToast("网络错误");
-                    }
-                });
-            }
+        Callback callback = new BaseCallback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final CommonResult result = JsonUtil.getObject(response.body().string(), CommonResult.class);
                 if (result.getCode() == 0) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showToast("保存成功");
-                        }
-                    });
+                    showToastOnUiThread("保存成功");
                 } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showToast(result.getMsg());
-                        }
-                    });
+                    showToastOnUiThread(result.getMsg());
                 }
             }
         };
@@ -134,34 +130,14 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
         HttpParam paramMsgContent = new HttpParam(CommonConstant.PARAM_MSG_CONTENT, text);
         HttpParam paramDevice = new HttpParam(CommonConstant.PARAM_DEVICE, CommonConstant.DEVICE_TYPE_APP);
 
-        Callback callback = new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showToast("网络错误");
-                    }
-                });
-            }
-
+        Callback callback = new BaseCallback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final CommonResult result = JsonUtil.getObject(response.body().string(), CommonResult.class);
                 if (result.getCode() == 0) {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showToast("保存成功");
-                        }
-                    });
+                    showToastOnUiThread("保存成功");
                 } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showToast(result.getMsg());
-                        }
-                    });
+                    showToastOnUiThread(result.getMsg());
                 }
             }
         };
@@ -171,35 +147,15 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
 
     private void deleteTextMsg(int msgId) {
         HttpParam param = new HttpParam(CommonConstant.PARAM_MSG_ID, String.valueOf(msgId));
-        Callback callback = new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showToast("网络错误");
-                    }
-                });
-            }
+        Callback callback = new BaseCallback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 final CommonResult result = JsonUtil.getObject(response.body().string(), CommonResult.class);
                 if (result.getCode() == 0) {
                     LitePal.deleteAll(TextMsg.class, "msgId = ?", String.valueOf(textMsg.getMsgId()));
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showToast("删除成功");
-                            finish();
-                        }
-                    });
+                    showToastOnUiThread("删除成功");
                 } else {
-                    runOnUiThread(new Runnable() {
-                        @Override
-                        public void run() {
-                            showToast(result.getMsg());
-                        }
-                    });
+                    showToastOnUiThread(result.getMsg());
                 }
             }
         };
