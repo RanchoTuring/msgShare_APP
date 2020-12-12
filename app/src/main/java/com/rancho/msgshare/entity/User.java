@@ -4,6 +4,8 @@ import com.google.gson.annotations.SerializedName;
 
 import org.litepal.crud.LitePalSupport;
 
+import java.util.Objects;
+
 import lombok.Data;
 
 @Data
@@ -20,5 +22,10 @@ public class User extends LitePalSupport {
             return u1.getUserId() == userId && u1.getName().equals(name);
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId, name);
     }
 }

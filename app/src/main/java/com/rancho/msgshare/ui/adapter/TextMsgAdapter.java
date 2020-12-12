@@ -61,6 +61,7 @@ public class TextMsgAdapter extends RecyclerView.Adapter<TextMsgAdapter.ViewHold
                 Intent intent = new Intent(view.getContext(), TextMsgDetailActivity.class);
                 intent.putExtra("msgId", textMsg.getMsgId());
                 intent.putExtra("content", textMsg.getContent());
+                intent.putExtra("utime", textMsg.getUtime());
                 view.getContext().startActivity(intent);
             }
         });

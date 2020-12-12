@@ -2,10 +2,14 @@ package com.rancho.msgshare.textmsg;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -73,6 +77,7 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
         textMsg = new TextMsg();
         textMsg.setMsgId(intent.getIntExtra("msgId", 0));
         textMsg.setContent(intent.getStringExtra("content"));
+        textMsg.setUtime(intent.getStringExtra("utime"));
     }
 
     @Override
@@ -90,7 +95,7 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
                 break;
             }
             case R.id.delete_text_msg: {
-                deleteTextMsg(textMsg.getMsgId());
+                confirmDelete();
                 break;
             }
         }
@@ -119,6 +124,7 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
                 } else {
                     showToastOnUiThread(result.getMsg());
                 }
+                hideKeyboard();
             }
         };
         HttpUtil.post(CommonConstant.HOST_URL + CommonConstant.TEXT_MSG_RES_URL,
@@ -139,6 +145,7 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
                 } else {
                     showToastOnUiThread(result.getMsg());
                 }
+                hideKeyboard();
             }
         };
         HttpUtil.put(CommonConstant.HOST_URL + CommonConstant.TEXT_MSG_RES_URL,
@@ -154,6 +161,7 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
                 if (result.getCode() == 0) {
                     LitePal.deleteAll(TextMsg.class, "msgId = ?", String.valueOf(textMsg.getMsgId()));
                     showToastOnUiThread("删除成功");
+                    finish();
                 } else {
                     showToastOnUiThread(result.getMsg());
                 }
@@ -162,5 +170,28 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
         HttpUtil.delete(CommonConstant.HOST_URL + CommonConstant.TEXT_MSG_RES_URL, callback, param);
     }
 
+    private void hideKeyboard() {
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+        inputMethodManager.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+    }
 
+    private void confirmDelete() {
+        AlertDialog confirmDelDialog = new AlertDialog.Builder(this)
+                .setTitle("确认删除")
+                .setMessage("是否删除此笔记？")
+                .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        deleteTextMsg(textMsg.getMsgId());
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                    }
+                })
+                .create();
+        confirmDelDialog.show();
+    }
 }

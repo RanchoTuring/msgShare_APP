@@ -109,7 +109,22 @@ public class UserLoginActivity extends BaseActivity implements View.OnClickListe
     }
 
     private void signUp(String username, String password) {
+        HttpParam paramUsername = new HttpParam(CommonConstant.PARAM_USERNAME, username);
+        HttpParam paramPassword = new HttpParam(CommonConstant.PARAM_PASSWORD, password);
 
+        Callback callback = new BaseCallback() {
+            @Override
+            public void onResponse(Call call, final Response response) throws IOException {
+                final CommonResult result = JsonUtil.getObject(response.body().string(), CommonResult.class);
+
+                if (result.getCode() == 0) {
+                    showToastOnUiThread("注册成功");
+                } else {
+                    showToastOnUiThread(result.getMsg());
+                }
+            }
+        };
+        HttpUtil.post(CommonConstant.HOST_URL + CommonConstant.USER_RES_URL, callback, paramUsername, paramPassword);
 
     }
 
@@ -122,6 +137,7 @@ public class UserLoginActivity extends BaseActivity implements View.OnClickListe
                 //   CommonResult result= JsonUtil.getObject("{\"id\": 123,\n" +
                 //         "\t\"msg\": \"计算机17-2\" }",CommonResult.class);
                 logIn(username, password);
+                break;
             }
             case R.id.sign_up: {
                 signUp(username, password);

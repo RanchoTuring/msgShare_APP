@@ -3,6 +3,8 @@ package com.rancho.msgshare.textmsg;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
@@ -29,6 +31,8 @@ import org.litepal.LitePal;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import okhttp3.Call;
@@ -37,7 +41,7 @@ import okhttp3.Response;
 
 public class TextMsgMainActivity extends BaseActivity implements View.OnClickListener {
 
-    private List<TextMsg> data = new ArrayList<>();
+    private List<TextMsg> data = new LinkedList<>();
 
     private TextMsgAdapter textMsgAdapter;
     private RecyclerView recyclerView;
@@ -49,6 +53,9 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
     abstract class BaseCallback implements Callback {
         @Override
         public void onFailure(Call call, IOException e) {
+            if (refreshLayout.isRefreshing()) {
+                refreshLayout.finishRefresh(500, false, true);
+            }
             showToastOnUiThread("网络错误");
         }
     }
@@ -57,7 +64,8 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
      * load data from DB
      */
     void initData() {
-        data = LitePal.where("userId = ?", String.valueOf(getCurrentId())).find(TextMsg.class);
+        data = LitePal.where("userId = ?", String.valueOf(getCurrentUserId())).find(TextMsg.class);
+        Collections.sort(data);
     }
 
 
@@ -72,7 +80,7 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
         refreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-                updateUserStatus(getCurrentId(), true);
+                updateUserStatus(getCurrentUserId(), true);
             }
         });
 
@@ -91,7 +99,7 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
     protected void onStart() {
         super.onStart();
         Log.d("start", "进入onStart");
-        updateUserStatus(getCurrentId(), false);
+        updateUserStatus(getCurrentUserId(), false);
     }
 
     /**
@@ -168,7 +176,7 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
                 } else {
                     Log.d("get version result.getCode()!=0", result.getMsg());
                     if (refreshByUser) {
-                        refreshLayout.finishRefresh(500, false, false);
+                        refreshLayout.finishRefresh(500, true, false);
                     }
                 }
             }
@@ -177,16 +185,31 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
         HttpUtil.get(CommonConstant.HOST_URL + CommonConstant.TEXT_VERSION_RES_URL, callback);
     }
 
-    private int getCurrentId() {
+    private boolean logOut() {
+        if (currentUser == null) {
+            LitePal.findFirst(User.class);
+        }
+        currentUser.delete();
+        return true;
+    }
+
+    private int getCurrentUserId() {
         if (currentUser == null) {
             currentUser = LitePal.findFirst(User.class);
         }
         return currentUser.getUserId();
     }
 
+    private String getCurrentUserName() {
+        if (currentUser == null) {
+            currentUser = LitePal.findFirst(User.class);
+        }
+        return currentUser.getName();
+    }
+
     private String getLocalVersion() {
         if (localVersion == null) {
-            localVersion = LitePal.where("userId = ?", String.valueOf(getCurrentId())).findFirst(Version.class);
+            localVersion = LitePal.where("userId = ?", String.valueOf(getCurrentUserId())).findFirst(Version.class);
         }
         return localVersion == null ? null : localVersion.getVersion();
     }
@@ -217,5 +240,29 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
                     }
                 }
         );
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.action_show_user: {
+                showToastOnUiThread(getCurrentUserName());
+                break;
+            }
+            case R.id.action_log_out: {
+                //TODO 退出登录
+                logOut();
+                finish();
+                break;
+            }
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
