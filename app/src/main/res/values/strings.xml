@@ -1,8 +1,9 @@
 <resources>
     <string name="save">保存</string>
     <string name="delete">删除</string>
+    <string name="undo">还原</string>
     <string name="before_source">from</string>
-    <string name="before_update_time">修改时间：</string>
+    <string name="before_update_time">上次编辑：</string>
     <string name="app_name">MsgShare</string>
     <string name="action_sign_up">注册</string>
     <string name="title_activity_user_login">请先登录或注册账户</string>

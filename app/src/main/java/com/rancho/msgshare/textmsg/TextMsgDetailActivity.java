@@ -12,6 +12,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.rancho.msgshare.R;
@@ -48,14 +49,18 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_text_msg_detail);
         editText = findViewById(R.id.msg_edit_text);
-        Button saveBtn = findViewById(R.id.save_text_msg);
-        Button delBtn = findViewById(R.id.delete_text_msg);
+        Button saveBtn = findViewById(R.id.save_text_msg_btn);
+        Button delBtn = findViewById(R.id.delete_text_msg_btn);
+        Button undoBtn = findViewById(R.id.undo_btn);
         saveBtn.setOnClickListener(this);
         delBtn.setOnClickListener(this);
+        undoBtn.setOnClickListener(this);
         Intent intent = getIntent();
 
         // mockData(intent);
         getTextMsgFromIntent(intent);
+        TextView utime = findViewById(R.id.msg_time_in_detail);
+        utime.setText(textMsg.getUtime());
 
         editText.setText(textMsg.getContent());
     }
@@ -83,7 +88,7 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case R.id.save_text_msg: {
+            case R.id.save_text_msg_btn: {
                 String newText = editText.getText().toString();
                 //新建的笔记
                 if (textMsg.getMsgId() == CommonConstant.NEW_MSG_ID) {
@@ -94,8 +99,13 @@ public class TextMsgDetailActivity extends AppCompatActivity implements View.OnC
 
                 break;
             }
-            case R.id.delete_text_msg: {
+            case R.id.delete_text_msg_btn: {
                 confirmDelete();
+                break;
+            }
+            case R.id.undo_btn:{
+                editText.setText(textMsg.getContent());
+                hideKeyboard();
                 break;
             }
         }

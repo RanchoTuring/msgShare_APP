@@ -105,7 +105,7 @@ public class UserLoginActivity extends BaseActivity implements View.OnClickListe
                 }
             }
         };
-        HttpUtil.get(CommonConstant.HOST_URL + CommonConstant.USER_RES_URL, callback, paramUsername, paramPassword);
+        HttpUtil.post(CommonConstant.HOST_URL + CommonConstant.USER_LOGIN_URL, callback, paramUsername, paramPassword);
     }
 
     private void signUp(String username, String password) {

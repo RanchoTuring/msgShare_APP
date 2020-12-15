@@ -228,6 +228,7 @@ public class TextMsgMainActivity extends BaseActivity implements View.OnClickLis
         Intent intent = new Intent(this, TextMsgDetailActivity.class);
         intent.putExtra("msgId", CommonConstant.NEW_MSG_ID);
         intent.putExtra("content", "");
+        intent.putExtra("utime", "Now");
         startActivity(intent);
     }
 

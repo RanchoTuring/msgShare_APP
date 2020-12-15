@@ -21,10 +21,11 @@ public class CommonConstant {
     public static String TEXT_MSG_RES_URL = "data/text";
     public static String TEXT_VERSION_RES_URL = "data/text/version";
     public static String USER_RES_URL = "user";
+    public static String USER_LOGIN_URL = "login";
     /**
      * statusUrl后边需要添加用户id
      */
-    public static String USER_STATUS_RES_URL = "user/status/";
+    public static String USER_STATUS_RES_URL = "user/";
     /**
      * http请求中所需的参数的key
      */
